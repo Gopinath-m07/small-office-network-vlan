@@ -1,1 +1,125 @@
+========================================
+ROUTER CONFIGURATION (Router0)
+========================================
 
+enable
+configure terminal
+
+hostname Router0
+
+! Enable main interface
+interface gigabitEthernet0/0
+ no shutdown
+exit
+
+! VLAN 10 - HR
+interface gigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+exit
+
+! VLAN 20 - SALES
+interface gigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip helper-address 192.168.10.2
+exit
+
+! VLAN 30 - IT
+interface gigabitEthernet0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+ ip helper-address 192.168.10.2
+exit
+
+end
+write memory
+
+
+========================================
+SWITCH CONFIGURATION (Switch0)
+========================================
+
+enable
+configure terminal
+
+hostname Switch0
+
+! Create VLANs
+vlan 10
+ name HR
+exit
+
+vlan 20
+ name SALES
+exit
+
+vlan 30
+ name IT
+exit
+
+! HR Department Ports
+interface range fa0/1-5
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+exit
+
+! SALES Department Ports
+interface range fa0/6-10
+ switchport mode access
+ switchport access vlan 20
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+exit
+
+! IT Department Ports
+interface range fa0/11-15
+ switchport mode access
+ switchport access vlan 30
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+exit
+
+! Server Port (VLAN 10)
+interface fa0/24
+ switchport mode access
+ switchport access vlan 10
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+exit
+
+! Trunk Port to Router
+interface fa0/23
+ switchport mode trunk
+exit
+
+
+=====================
+PORT SECURITY 
+=====================
+
+interface fa0/1
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+exit
+
+interface fa0/6
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+exit
+
+interface fa0/11
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+exit
+
+end
+write memory
